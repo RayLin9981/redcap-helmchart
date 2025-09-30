@@ -1,97 +1,75 @@
 #!/bin/sh
 
-# Name: redcap_install
-# Version: 1.1
-# Author: APHP
-# Description : Retrieves and unpack REDCap and a translation package 
-
+# Name: redcap_install_manual
+# Version: 1.0
+# Author: Custom
+# Description: Installs REDCap from a manually uploaded ZIP file.
 
 #####################
 ### GLOBAL CONFIG ###
 #####################
 set -e
 REDCAP_INSTALL=1
-
+ZIP_SOURCE="/tmp/redcap/redcap.zip"
+CHECK_INTERVAL=60   # 每次檢查間隔秒數
+CHECK_COUNT=0       # 檢查次數計數器
 
 #############################
 ### FUNCTION DECLARATIONS ###
 #############################
 
-# Installs the REDCap Application package by retrieving it directly from the Community Site API, using the user's credentials.
-install_redcap () {
+# 等待使用者上傳 redcap.zip
+wait_for_zip () {
+    echo "[INFO] Waiting for REDCap package to be uploaded at $ZIP_SOURCE"
 
+    while [ ! -f "$ZIP_SOURCE" ]; do
+        CHECK_COUNT=$((CHECK_COUNT + 1))
+        echo "[WAIT] ($CHECK_COUNT) File not found, checking again in ${CHECK_INTERVAL}s..."
+        sleep "$CHECK_INTERVAL"
+    done
+
+    echo "[INFO] Found REDCap package after $CHECK_COUNT checks."
+}
+
+# 安裝 REDCap
+install_redcap () {
     if [ "$REDCAP_INSTALL" = 1 ]; then
         echo "[INFO] Installing REDCap version $REDCAP_VERSION from scratch"
         echo "[INFO] Cleaning destination dir"
         rm -rvf "${REDCAP_INSTALL_PATH:?}/*"
-
+    else
+        echo "[INFO] Upgrading REDCap, preserving existing installation"
     fi
 
-    echo "[INFO] Downloading and extracting REDCap package"
-    curl \
-        --location 'https://redcap.vumc.org/plugins/redcap_consortium/versions.php' \
-        --header 'Content-Type: application/x-www-form-urlencoded' \
-        --data-urlencode "username=$REDCAP_COMMUNITY_USERNAME" \
-        --data-urlencode "password=$REDCAP_COMMUNITY_PASSWORD" \
-        --data-urlencode "version=$REDCAP_VERSION" \
-        --data-urlencode "install=$REDCAP_INSTALL" \
-        --write-out "File name : %{filename_effective}\nFetched from: %{url}\nStatistics:\n\tDownload Time : %{time_total}\n\tDownload Size : %{size_download}\n\tDownload Speed : %{speed_download}\n" \
-        --no-progress-meter \
-        --output '/tmp/redcap/redcap.zip'
-
-    echo "[INFO] Installing REDCap package"
-    unzip -o "/tmp/redcap/redcap.zip" -d /tmp/redcap
+    echo "[INFO] Extracting REDCap package from $ZIP_SOURCE"
+    unzip -o "$ZIP_SOURCE" -d /tmp/redcap
     cp -rvf /tmp/redcap/redcap/* "${REDCAP_INSTALL_PATH}/"
 
     echo "[INFO] Applying CRLF EOF bugfix to installed REDCap package"
     find "${REDCAP_INSTALL_PATH}" -type f -name '*.php' -print0 | xargs -0 dos2unix
 
-    echo "[INFO] Cleaning"
+    echo "[INFO] Cleaning temporary files"
     rm -rvf "/tmp/redcap/*"
 
     echo "[INFO] Installation done!"
 }
 
-# Injects the content of the Configmap holding the "database.php" file into the downloaded REDCap application directory,
-# before the Pod's main container mounts this directory as read-only (which prevents traditional Configmap mounting).
+# 更新 database.php
 update_database_config () {
-
     echo "[INFO] Injecting REDCap database configuration"
     cp -f /tmp/conf/database.php "${REDCAP_INSTALL_PATH}/database.php"
-
     echo "[INFO] REDCap Database configuration updated!"
 }
-
 
 ##########################
 ### SCRIPT STARTS HERE ###
 ##########################
+echo "[INFO] Starting REDCap manual installation script v1.0"
 
-echo "[INFO] Starting REDCap package installation script v1.1"
-
-# Ugrading REDCap if an existing installation of lower version has been found
-if  [ -n "$(find "$REDCAP_INSTALL_PATH" -mindepth 1 -maxdepth 1 -not -path "$REDCAP_INSTALL_PATH/lost+found")" ]; then
-    REDCAP_PREFIX='redcap_v'
-
-    REDCAP_VERSION_SANITIZED=$(echo "$REDCAP_VERSION" | tr -d '.')
-
-    REDCAP_CURRENT_VERSION=$(ls "${REDCAP_INSTALL_PATH}" | grep ${REDCAP_PREFIX} | sort -rst '/' -k1,1 | head -n 1 | sed -e "s/^${REDCAP_PREFIX}//")
-    REDCAP_CURRENT_VERSION_SANITIZED=$(echo "$REDCAP_CURRENT_VERSION" | tr -d '.')
-
-    if  [ "$REDCAP_VERSION_SANITIZED" -eq "$REDCAP_CURRENT_VERSION_SANITIZED" ]; then
-        echo "[INFO] REDCap version ${REDCAP_VERSION} files are already present in ${REDCAP_INSTALL_PATH}. Skipping installation process."
-        exit 0
-
-    elif  [ "$REDCAP_VERSION_SANITIZED" -gt "$REDCAP_CURRENT_VERSION_SANITIZED" ]; then
-        echo "[INFO] Upgrading existing REDCap installation from version $REDCAP_CURRENT_VERSION to $REDCAP_VERSION"
-        REDCAP_INSTALL=0
-    fi
-
-fi
-
+wait_for_zip
 install_redcap
 update_database_config
-echo "[INFO] REDCap version $REDCAP_VERSION have been correctly installed."
-exit 0
 
+echo "[INFO] REDCap version $REDCAP_VERSION has been correctly installed."
+exit 0
 

@@ -1,7 +1,7 @@
 ingress:
   enabled: true
   hosts:
-  - host: "redcap.example.com"
+  - host: "localhost"
     paths:
       - path: /
         pathType: "ImplementationSpecific"
@@ -19,10 +19,13 @@ redcap:
   install:
     enabled: true
     version: "15.0.27"
+
     communityAuth:
       existingSecret: "redcap-community-credentials"
+
   config:
     logAllErrors: "TRUE"
+
   resources:
     requests:
       memory: "2Gi"
@@ -40,6 +43,7 @@ mysql:
       limits:
         memory: "4Gi"
         cpu: "2"
+
 backupJob:
   enabled: false
   resources:
