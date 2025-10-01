@@ -24,6 +24,9 @@ metadata:
     release: {{ .Release.Name }}
   {{- with .Values.ingress.annotations }}
   annotations:
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+    nginx.ingress.kubernetes.io/send-timeout: "300"
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:

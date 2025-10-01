@@ -1,7 +1,10 @@
+global:
+  security:
+    allowInsecureImages: true
 ingress:
   enabled: true
   hosts:
-  - host: "redcap.example.com"
+  - host: "pocredcap.ntuh.gov.tw"
     paths:
       - path: /
         pathType: "ImplementationSpecific"
@@ -32,6 +35,8 @@ redcap:
       cpu: "2"
 
 mysql:
+  image:
+    repository: bitnamilegacy/mysql
   primary:
     resources:
       requests:
