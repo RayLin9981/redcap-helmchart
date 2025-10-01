@@ -1,0 +1,6 @@
+         mysql \
+            --host=redcap-mysql \
+            --database=redcap \
+            --user=redcap \
+            --password=${DB_PASSWD} \
+            -v < /restore/restore.sql

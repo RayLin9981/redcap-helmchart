@@ -1,0 +1,78 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redcap-redcap-restore
+  labels:
+    helm.sh/chart: redcap-1.4.5
+    app.kubernetes.io/name: redcap-restore
+    app.kubernetes.io/instance: redcap
+    app.kubernetes.io/role: redcap-restore
+    app.kubernetes.io/version: "14.5.25"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: redcap-restore
+      app.kubernetes.io/instance: redcap
+  template:
+    metadata:
+      labels:
+        helm.sh/chart: redcap-1.4.5
+        app.kubernetes.io/name: redcap-restore
+        app.kubernetes.io/instance: redcap
+        app.kubernetes.io/role: redcap-restore
+        app.kubernetes.io/version: "14.5.25"
+        app.kubernetes.io/managed-by: Helm
+    spec:
+      securityContext:
+        runAsUser: 2000
+        runAsGroup: 2000
+        fsGroup: 2000
+        fsGroupChangePolicy: "OnRootMismatch"
+        runAsNonRoot: true
+      containers:
+      - name: db-restore
+        image: "bitnamilegacy/mysql:9.3.0-debian-12-r1"
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: DB_PASSWD
+          valueFrom:
+            secretKeyRef:
+              name: redcap-mysql
+              key: mysql-password
+        command:
+        - "sh"
+        - "-c"
+        - "sleep infinity"
+        securityContext:
+          allowPrivilegeEscalation: false
+        resources:
+          limits:
+            cpu: "0.5"
+            memory: 1Gi
+          requests:
+            cpu: "0.25"
+            memory: 256Mi
+        volumeMounts:
+        - name: backup-data
+          mountPath: /backup-data
+        - name: nfs-backup
+          mountPath: /nfs-backup
+
+      volumes:
+      - name: redcap-code
+        persistentVolumeClaim:
+          claimName: redcap-app-pvc
+      - name: edocs
+        persistentVolumeClaim:
+          claimName: redcap-edocs-pvc
+      - name: backup-data
+        emptyDir: {}
+      - name: nfs-backup
+        nfs:
+          server: nxfs.ntuh.gov.tw
+          path: /Redcap/RedCapDBBackup
+
+      restartPolicy: Always
+
