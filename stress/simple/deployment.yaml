@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: k6-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: k6
+  template:
+    metadata:
+      labels:
+        app: k6
+    spec:
+      containers:
+        - name: k6
+          image: grafana/k6:latest
+          envFrom:
+            - configMapRef:
+                name: k6-config
+          volumeMounts:
+            - name: k6-minimal-script
+              mountPath: /scripts/minimal
+            - name: k6-script
+              mountPath: /scripts/full
+          command: ["sleep", "infinity"]  # 保持 Pod 存活，方便 exec
+      volumes:
+        - name: k6-minimal-script
+          configMap:
+            name: k6-minimal-script
+        - name: k6-script
+          configMap:
+            name: k6-script
+

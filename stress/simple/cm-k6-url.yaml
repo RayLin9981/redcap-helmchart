@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: k6-config
+data:
+  TARGET_URL: "https://pocredcap.ntuh.gov.tw"
+

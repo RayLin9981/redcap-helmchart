@@ -33,6 +33,16 @@ redcap:
     limits:
       memory: "4Gi"
       cpu: "2"
+  image:
+    # -- Image repository for REDCap PHP-FPM Image.
+    # @section -- REDCap settings
+    repository: "docker.io/raylin9981/redcap-php-fpm"
+    # -- PullPolicy for REDCap PHP-FPM Image.
+    # @section -- REDCap settings
+    pullPolicy: "Always"
+    # -- Tag for REDCap PHP-FPM Image.
+    # @section -- REDCap settings
+    tag: "1.2.0-20251003-v2"
 
 mysql:
   image:
@@ -45,6 +55,10 @@ mysql:
       limits:
         memory: "4Gi"
         cpu: "2"
+    persistence:
+      # -- StorageClass used for database persistence.
+      # @section -- REDCap MySQL Database settings
+      storageClass: "local-path"
 backupJob:
   enabled: false
   resources:
