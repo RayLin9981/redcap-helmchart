@@ -7,6 +7,7 @@ data:
   redcap.conf: |
     server {
         listen 1080;
+        listen 1443 ssl;
 
         server_name _;
 
@@ -16,6 +17,12 @@ data:
 
         access_log /dev/stdout;
         error_log /dev/stderr;
+
+        # TLS 憑證設定（掛載 redcap-tls secret）
+        ssl_certificate     /etc/nginx/ssl/tls.crt;
+        ssl_certificate_key /etc/nginx/ssl/tls.key;
+        ssl_protocols       TLSv1.2 TLSv1.3;
+        ssl_ciphers         HIGH:!aNULL:!MD5;
 
         location / {
             try_files $uri $uri/ /index.php?$args;
@@ -34,4 +41,3 @@ data:
             autoindex on;
         }
     }
-

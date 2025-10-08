@@ -27,7 +27,13 @@ spec:
         - mountPath: /etc/nginx/conf.d/redcap.conf
           name: nginx-conf
           subPath: redcap.conf
+        - name: nginx-tls
+          mountPath: /etc/nginx/ssl
+          readOnly: true
       volumes:
+      - name: nginx-tls
+        secret:
+          secretName: redcap-tls
       - name: redcap-app
         persistentVolumeClaim:
           claimName: redcap-app-pvc
