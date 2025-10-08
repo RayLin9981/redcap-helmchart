@@ -1,0 +1,42 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: k6-run-all
+spec:
+  backoffLimit: 0
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: k6
+          image: grafana/k6:latest
+          command: ["sh", "-c"]
+          args:
+            - |
+              echo "🚀 Starting full k6 test suite...";
+              for script in /scripts/test-*.js; do
+                name=$(basename $script .js);
+                echo "▶ Running $name...";
+                k6 run --insecure-skip-tls-verify \
+                  --summary-export /results/${name}.json \
+                  $script;
+                echo "✅ Finished $name";
+                sleep 10;
+              done;
+              echo "🎉 All k6 tests completed. Results stored in /results/";
+          envFrom:
+            - configMapRef:
+                name: k6-config
+          volumeMounts:
+            - name: k6-script
+              mountPath: /scripts
+            - name: results
+              mountPath: /results
+      volumes:
+        - name: k6-script
+          configMap:
+            name: k6-load-scenarios
+        - name: results
+          persistentVolumeClaim:
+            claimName: k6-results-pvc
+
