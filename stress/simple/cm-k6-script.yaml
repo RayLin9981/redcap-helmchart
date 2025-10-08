@@ -15,7 +15,7 @@ data:
         { duration: '2m', target: 0 },
       ],
       thresholds: {
-        http_req_duration: ['p95<3000'], // p95 ≤ 3 秒
+        http_req_duration: ['p(95)<3000'], // p95 ≤ 3 秒
         http_req_failed: ['rate<0.01'],  // 錯誤率 ≤ 1%
       },
     };

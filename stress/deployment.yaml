@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: k6-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: k6
+  template:
+    metadata:
+      labels:
+        app: k6
+    spec:
+      containers:
+        - name: k6
+          image: grafana/k6:latest
+          command: ["sleep", "infinity"]  # 保持 Pod 存活，方便 exec
+          envFrom:
+            - configMapRef:
+                name: k6-config
+          volumeMounts:
+            - name: k6-script
+              mountPath: /scripts
+          volumeMounts:
+            - name: results
+              mountPath: /results
+      volumes:
+        - name: k6-script
+          configMap:
+            name: k6-load-scenarios
+        - name: results
+          persistentVolumeClaim:
+            claimName: k6-results-pvc
+
