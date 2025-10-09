@@ -17,8 +17,7 @@ spec:
               for script in /scripts/test-*.js; do
                 name=$(basename $script .js);
                 echo "▶ Running $name...";
-                k6 run --insecure-skip-tls-verify \
-                  --summary-export /results/${name}.json \
+                K6_WEB_DASHBOARD=true K6_WEB_DASHBOARD_EXPORT=/results/${name}.html k6 run --insecure-skip-tls-verify \
                   $script;
                 echo "✅ Finished $name";
                 sleep 10;
