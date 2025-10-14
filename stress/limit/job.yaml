@@ -1,0 +1,43 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: k6-html-report
+spec:
+  backoffLimit: 0
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: k6
+          image: grafana/k6:latest
+          command: ["sh", "-c"]
+          args:
+            - |
+              name=auto-limit;
+              echo "🚀 開始壓測並輸出 HTML 報告...";
+              K6_WEB_DASHBOARD=true \
+              K6_WEB_DASHBOARD_EXPORT=/results/${name}.html \
+              k6 run --insecure-skip-tls-verify /scripts/auto-limit.js;
+              echo "✅ 完成，報告位於 /results/${name}.html";
+          env:
+            - name: TARGET_URL
+              value: "http://httpbin"
+            - name: STEP_DURATION
+              value: "2m"
+            - name: STEP_SIZE
+              value: "2000"
+            - name: MAX_VU
+              value: "20000"
+          volumeMounts:
+            - name: k6-script
+              mountPath: /scripts
+            - name: results
+              mountPath: /results
+      volumes:
+        - name: k6-script
+          configMap:
+            name: k6-auto-limit-test
+        - name: results
+          persistentVolumeClaim:
+            claimName: k6-results-pvc
+

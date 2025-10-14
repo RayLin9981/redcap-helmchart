@@ -1,0 +1,54 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: k6-auto-limit-test
+data:
+  auto-limit.js: |
+    import http from 'k6/http';
+    import { sleep } from 'k6';
+    import { Trend, Rate } from 'k6/metrics';
+
+    // 自訂指標
+    let responseTime = new Trend('response_time');
+    let errorRate = new Rate('error_rate');
+
+    const BASE_URL = __ENV.TARGET_URL || 'https://example.com';
+    const STEP_DURATION = __ENV.STEP_DURATION || '60s'; // 每個階段長度
+    const MAX_VU = parseInt(__ENV.MAX_VU || '50000');   // 最大虛擬使用者
+    const STEP_SIZE = parseInt(__ENV.STEP_SIZE || '1000'); // 每次增加的使用者數
+
+    // 基本測試動作
+    export default function () {
+      let res = http.get(`${BASE_URL}/`);
+      responseTime.add(res.timings.duration);
+      errorRate.add(res.status >= 400);
+      sleep(1);
+    }
+
+    // 自動化階段生成
+    export let options = {
+      discardResponseBodies: true,
+      scenarios: {
+        incremental_load: {
+          executor: 'ramping-vus',
+          startVUs: 0,
+          stages: Array.from({ length: MAX_VU / STEP_SIZE }, (_, i) => ({
+            duration: STEP_DURATION,
+            target: (i + 1) * STEP_SIZE,
+          })),
+          gracefulRampDown: '30s',
+        },
+      },
+      thresholds: {
+        error_rate: ['rate<0.1'], // 錯誤率 < 10%
+        response_time: ['p(95)<5000'], // P95 < 5 秒
+      },
+    };
+
+    export function handleSummary(data) {
+      console.log('📊 壓測完成，輸出結果中...');
+      return {
+        '/results/auto-limit.json': JSON.stringify(data, null, 2),
+      };
+    }
+
