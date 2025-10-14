@@ -19,16 +19,11 @@ spec:
             - configMapRef:
                 name: k6-config
           volumeMounts:
-            - name: k6-minimal-script
-              mountPath: /scripts/minimal
             - name: k6-script
               mountPath: /scripts/full
           command: ["sleep", "infinity"]  # 保持 Pod 存活，方便 exec
       volumes:
-        - name: k6-minimal-script
-          configMap:
-            name: k6-minimal-script
         - name: k6-script
           configMap:
-            name: k6-script
+            name: k6-load-scenarios
 
