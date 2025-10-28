@@ -1,0 +1,89 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sysbench-scripts
+data:
+  sysbench-readonly.sh: |
+    #!/bin/bash
+    set -e
+
+    echo "=== 🧩 Sysbench Read-Only Test Start ==="
+    echo "Host: ${MYSQL_HOST}"
+    echo "Tables: ${TABLES}"
+    echo "Table size: ${TABLE_SIZE}"
+
+    sysbench /usr/share/sysbench/oltp_read_only.lua \
+      --mysql-host=${MYSQL_HOST} \
+      --mysql-port=3306 \
+      --mysql-user=sbtest \
+      --mysql-password=sbtest \
+      --mysql-db=sbtest \
+      --tables=${TABLES} \
+      --table-size=${TABLE_SIZE} \
+      prepare
+
+    sysbench /usr/share/sysbench/oltp_read_only.lua \
+      --mysql-host=${MYSQL_HOST} \
+      --mysql-port=3306 \
+      --mysql-user=sbtest \
+      --mysql-password=sbtest \
+      --mysql-db=sbtest \
+      --tables=${TABLES} \
+      --table-size=${TABLE_SIZE} \
+      --threads=8 \
+      --time=60 \
+      --report-interval=10 \
+      run
+
+    sysbench /usr/share/sysbench/oltp_read_only.lua \
+      --mysql-host=${MYSQL_HOST} \
+      --mysql-port=3306 \
+      --mysql-user=sbtest \
+      --mysql-password=sbtest \
+      --mysql-db=sbtest \
+      --tables=${TABLES} \
+      --table-size=${TABLE_SIZE} \
+      cleanup
+
+  sysbench-writeonly.sh: |
+    #!/bin/bash
+    set -e
+
+    echo "=== 🧩 Sysbench Write-Only Test Start ==="
+    echo "Host: ${MYSQL_HOST}"
+    echo "Tables: ${TABLES}"
+    echo "Table size: ${TABLE_SIZE}"
+
+    sysbench /usr/share/sysbench/oltp_write_only.lua \
+      --mysql-host=${MYSQL_HOST} \
+      --mysql-port=3306 \
+      --mysql-user=sbtest \
+      --mysql-password=sbtest \
+      --mysql-db=sbtest \
+      --tables=${TABLES} \
+      --table-size=${TABLE_SIZE} \
+      prepare
+
+    sysbench /usr/share/sysbench/oltp_write_only.lua \
+      --mysql-host=${MYSQL_HOST} \
+      --mysql-port=3306 \
+      --mysql-user=sbtest \
+      --mysql-password=sbtest \
+      --mysql-db=sbtest \
+      --tables=${TABLES} \
+      --table-size=${TABLE_SIZE} \
+      --threads=8 \
+      --time=60 \
+      --report-interval=10 \
+      run
+
+    sysbench /usr/share/sysbench/oltp_write_only.lua \
+      --mysql-host=${MYSQL_HOST} \
+      --mysql-port=3306 \
+      --mysql-user=sbtest \
+      --mysql-password=sbtest \
+      --mysql-db=sbtest \
+      --tables=${TABLES} \
+      --table-size=${TABLE_SIZE} \
+      cleanup
+

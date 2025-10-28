@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: sysbench
+  name: sysbench
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sysbench
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: sysbench
+    spec:
+      containers:
+      - command:
+        - sleep
+        - infinity
+        image: docker.io/raylin9981/redcap:sysbench
+        name: redcap
+        env:
+        - name: MYSQL_HOST
+          value: "redcap-mysql"       # 可改為外部 Service 名稱
+        - name: TABLES
+          value: "20"
+        - name: TABLE_SIZE
+          value: "10000"
+        volumeMounts:
+        - name: sysbench-scripts
+          mountPath: /scripts
+      volumes:
+      - name: sysbench-scripts
+        configMap:
+          name: sysbench-scripts
+          defaultMode: 0755

@@ -1,0 +1,7 @@
+mysql -u root -p$(cat ${MYSQL_ROOT_PASSWORD_FILE})
+#
+CREATE USER 'sbtest'@'%' IDENTIFIED BY 'sbtest';
+GRANT ALL PRIVILEGES ON sbtest.* TO 'sbtest'@'%';
+FLUSH PRIVILEGES;
+#
+
