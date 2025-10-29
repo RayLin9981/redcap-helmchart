@@ -33,6 +33,7 @@ data:
       --threads=8 \
       --time=60 \
       --report-interval=10 \
+      --histogram \
       run
 
     sysbench /usr/share/sysbench/oltp_read_only.lua \
@@ -75,6 +76,7 @@ data:
       --threads=8 \
       --time=60 \
       --report-interval=10 \
+      --histogram \
       run
 
     sysbench /usr/share/sysbench/oltp_write_only.lua \
