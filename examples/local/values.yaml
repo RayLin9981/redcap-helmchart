@@ -21,7 +21,8 @@ httpd:
 redcap:
   install:
     enabled: true
-    version: "15.0.27"
+    #version: "15.0.27"
+    version: "15.2.27"
     communityAuth:
       existingSecret: "redcap-community-credentials"
   config:
@@ -60,7 +61,8 @@ mysql:
       # @section -- REDCap MySQL Database settings
       storageClass: "local-path"
 backupJob:
-  enabled: false
+  #enabled: false
+  enabled: true
   resources:
     requests:
       memory: "256Mi"
@@ -77,3 +79,55 @@ restoreJob:
     limits:
       memory: "1Gi"
       cpu: "0.5"
+
+# Autoscaling settings
+autoscaling:
+  # -- If set to `true`, enables autoscaling
+  # @section -- Autoscaling settings
+  enabled: false
+  # -- Minimum replicas instances.
+  # @section -- Autoscaling settings
+  minReplicas: 1
+  # -- Maximum replicas target
+  # @section -- Autoscaling settings
+  maxReplicas: 3
+  # -- CPU usage threshold for autoscaling.
+  # @section -- Autoscaling settings
+  targetCPUUtilizationPercentage: 80
+  # -- Memory usage threshold for autoscaling.
+  # @section -- Autoscaling settings
+  targetMemoryUtilizationPercentage: 80
+
+persistence:
+  app:
+    storageClass: "standard"
+    # -- AccessMode of the volume used to persist REDCap code.
+    # @section -- Persistence settings
+    accessMode: "ReadWriteOnce"
+  edocs:
+    # -- Annotations related to the volume handling the REDCap users edocs.
+    # @section -- Persistence settings
+    # @default -- Keeping the volume after a Helm release deletion.
+    annotations:
+      helm.sh/resource-policy: "keep"
+    # -- Size of the volume used to persist documents uploaded by REDCap users.
+    # @section -- Persistence settings
+    size: "8Gi"
+    # -- StorageClass of the volume used to persist documents uploaded by REDCap users.
+    # @section -- Persistence settings
+    storageClass: "standard"
+    # -- AccessMode of the volume used to persist documents uploaded by REDCap users.
+    # @section -- Persistence settings
+    accessMode: "ReadWriteOnce"
+  modules:
+    annotations:
+      helm.sh/resource-policy: "keep"
+    # -- Size of the volume used to persist REDCap modules.
+    # @section -- Persistence settings
+    size: "1Gi"
+    # -- StorageClass of the volume used to persist REDCap modules.
+    # @section -- Persistence uploaded
+    storageClass: "standard"
+    # -- AccessMode of the volume used to persist REDCap modules.
+    # @section -- Persistence settings
+    accessMode: "ReadWriteOnce"

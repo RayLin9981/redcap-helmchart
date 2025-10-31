@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: redcap-db-config
+  labels:
+    app.kubernetes.io/name: redcap
+    app.kubernetes.io/component: database
+data:
+  DB_HOST: redcap-mysql
+  DB_USER: redcap
+  DB_NAME: redcap
+

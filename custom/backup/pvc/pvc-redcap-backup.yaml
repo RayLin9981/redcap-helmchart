@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: redcap-backup-pvc
+  labels:
+    app.kubernetes.io/name: redcap-backup
+    app.kubernetes.io/instance: redcap
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+
