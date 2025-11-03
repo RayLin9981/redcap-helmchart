@@ -1,6 +1,13 @@
-# add redcap.zip
-kubectl cp -n redcap ./redcap.zip redcap-764f7f77d5-8mz6q:/tmp/redcap/redcap.zip -c init-download-redcap
+#add redcap.zip
 
+kubectl cp -n redcap ./redcap.zip \
+  redcap-764f7f77d5-8mz6q:/tmp/redcap/redcap_full_15.0.27.zip \
+  -c init-download-redcap
+kubectl cp -n redcap ./modules $(kubectl get pods -l "app.kubernetes.io/name"=redcap -o jsonpath='{.items[0].metadata.name}'):/app/redcap/modules
+kubectl cp -n redcap ./languages $(kubectl get pods -l "app.kubernetes.io/name"=redcap -o jsonpath='{.items[0].metadata.name}'):/app/redcap/languages
+kubectl cp -n redcap ./ldap_config.php $(kubectl get pods -l "app.kubernetes.io/name"=redcap -o jsonpath='{.items[0].metadata.name}'):/app/redcap/webtools2/ldap
+
+#kubectl cp -n redcap ./redcap.zip redcap-764f7f77d5-8mz6q:/tmp/redcap/redcap.zip -c init-download-redcap
 # helm install
 helm upgrade --create-namespace --install redcap ./charts/redcap -f ./examples/local/values.yaml -n redcap
 # uninstall
