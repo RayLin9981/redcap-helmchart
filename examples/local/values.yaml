@@ -84,7 +84,8 @@ restoreJob:
 autoscaling:
   # -- If set to `true`, enables autoscaling
   # @section -- Autoscaling settings
-  enabled: false
+  #enabled: false
+  enabled: true
   # -- Minimum replicas instances.
   # @section -- Autoscaling settings
   minReplicas: 1

@@ -26,11 +26,15 @@ spec:
         app.kubernetes.io/managed-by: Helm
     spec:
       securityContext:
-        runAsUser: 2000
+        runAsUser: 0
         runAsGroup: 2000
         fsGroup: 2000
-        fsGroupChangePolicy: "OnRootMismatch"
-        runAsNonRoot: true
+      #securityContext:
+      #  runAsUser: 2000
+      #  runAsGroup: 2000
+      #  fsGroup: 2000
+      #  fsGroupChangePolicy: "OnRootMismatch"
+      #  runAsNonRoot: true
       containers:
       - name: db-restore
         image: "bitnamilegacy/mysql:9.3.0-debian-12-r1"

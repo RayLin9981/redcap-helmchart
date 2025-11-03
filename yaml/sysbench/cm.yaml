@@ -12,7 +12,7 @@ data:
     echo "Tables: ${TABLES}"
     echo "Table size: ${TABLE_SIZE}"
 
-    sysbench /usr/share/sysbench/oltp_read_only.lua \
+    sysbench /usr/local/share/sysbench/oltp_read_only.lua \
       --mysql-host=${MYSQL_HOST} \
       --mysql-port=3306 \
       --mysql-user=sbtest \
@@ -22,7 +22,7 @@ data:
       --table-size=${TABLE_SIZE} \
       prepare
 
-    sysbench /usr/share/sysbench/oltp_read_only.lua \
+    sysbench /usr/local/share/sysbench/oltp_read_only.lua \
       --mysql-host=${MYSQL_HOST} \
       --mysql-port=3306 \
       --mysql-user=sbtest \
@@ -36,7 +36,7 @@ data:
       --histogram \
       run
 
-    sysbench /usr/share/sysbench/oltp_read_only.lua \
+    sysbench /usr/local/share/sysbench/oltp_read_only.lua \
       --mysql-host=${MYSQL_HOST} \
       --mysql-port=3306 \
       --mysql-user=sbtest \
@@ -55,7 +55,7 @@ data:
     echo "Tables: ${TABLES}"
     echo "Table size: ${TABLE_SIZE}"
 
-    sysbench /usr/share/sysbench/oltp_write_only.lua \
+    sysbench /usr/local/share/sysbench/oltp_write_only.lua \
       --mysql-host=${MYSQL_HOST} \
       --mysql-port=3306 \
       --mysql-user=sbtest \
@@ -65,7 +65,7 @@ data:
       --table-size=${TABLE_SIZE} \
       prepare
 
-    sysbench /usr/share/sysbench/oltp_write_only.lua \
+    sysbench /usr/local/share/sysbench/oltp_write_only.lua \
       --mysql-host=${MYSQL_HOST} \
       --mysql-port=3306 \
       --mysql-user=sbtest \
@@ -79,7 +79,7 @@ data:
       --histogram \
       run
 
-    sysbench /usr/share/sysbench/oltp_write_only.lua \
+    sysbench /usr/local/share/sysbench/oltp_write_only.lua \
       --mysql-host=${MYSQL_HOST} \
       --mysql-port=3306 \
       --mysql-user=sbtest \
