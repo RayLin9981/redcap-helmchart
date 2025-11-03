@@ -25,8 +25,53 @@ redcap:
     version: "15.2.27"
     communityAuth:
       existingSecret: "redcap-community-credentials"
+  database:
+    auth:
+      # -- The hostname of REDCap's database instance.
+      # @section -- REDCap settings
+      hostname: "redcap-mysql"
+      # -- The name of REDCAP's database.
+      # @section -- REDCap settings
+      databaseName: "redcap"
+      # -- The username used to connect to REDCAP's database.
+      # @section -- REDCap settings
+      username: "redcap"
+        # -- The password used to connect to REDCAP's database. Automatically retrieved from the default mysql secret name if you enbaled
+        #    the MySQL database embedded in this chart. If you specified a reference to an secret for your MySQL database password, you·
+        #    have to set it here also, in the `secretKeyRef` section.
+      password:
+        # -- The password used to connect to REDCAP's database, as a clear string. Don't use the option for a production-grade deployment,·                       #    refer to an external secret instead!                                                                                                                 # @section -- REDCap settings
+        value: ""
+        secretKeyRef:
+          # -- The name of the secret holding the password used to connect to REDCAP database.                                                                      #    If set, the value of that secret will override the `redcap.config.database.auth.password.value` value.                                               # @section -- REDCap settings
+          name: ""
+          # -- The key of the secret holding the password used to connect to REDCAP database.
+          #    If set, the value of that secret will override the `redcap.config.database.auth.password.value` value.
+          # @section -- REDCap settings
+          key: ""
   config:
-    logAllErrors: "TRUE"
+    # -- If set to `true`, will log all the errors on the stdout (NOT RECOMMENDED IN PRODUCTION).
+    # @section -- REDCap settings
+    logAllErrors: "FALSE"
+    # -- The URL on which the application is exposed (useful if the application is behind a reverse-proxy).
+    # @section -- REDCap settings
+    externalURL: "http://localhost/"
+    # -- The name of the institution that is presented to the users.
+    # @section -- REDCap settings
+    institutionName: "REDCap Local Institution"
+    # -- The name of the origanization inside the institution that is presented to the users.
+    # @section -- REDCap settings
+    organizationName: "REDCap Local Organization"
+    # -- The name of the administrator that is presented to the users.
+    # @section -- REDCap settings
+    adminName: "REDCap Local Admin"
+    # -- The email of the administrator that is presented to the users.
+    # @section -- REDCap settings
+    adminMail: "redcap-admin@local.com"
+    # -- Prevents modifications on REDCap application directory for security reasons. Not compatible with the·
+    #    `Easy Upgrade` feature, that should be disabled from the Control Center if this option is enabled.
+    # @section -- REDCap settings
+    readOnlyAppDir: true
   resources:
     requests:
       memory: "2Gi"
