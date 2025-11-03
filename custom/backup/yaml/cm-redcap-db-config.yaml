@@ -7,6 +7,6 @@ metadata:
     app.kubernetes.io/component: database
 data:
   DB_HOST: redcap-mysql
-  DB_USER: redcap
+  DB_USER: root
   DB_NAME: redcap
 

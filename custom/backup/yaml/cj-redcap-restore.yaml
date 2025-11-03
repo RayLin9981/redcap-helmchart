@@ -29,8 +29,12 @@ spec:
             envFrom:
             - configMapRef:
                 name: redcap-db-config
-            - secretRef:
-                name: redcap-database-credentials
+            env:
+            - name: DB_PASSWD
+              valueFrom:
+                secretKeyRef:
+                  name: redcap-mysql
+                  key: mysql-root-password
             volumeMounts:
             - name: redcap-code
               mountPath: /redcap

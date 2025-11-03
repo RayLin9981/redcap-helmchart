@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redcap-nginx
+  labels:
+    app: redcap-nginx
+  namespace: redcap
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redcap-nginx
+  template:
+    metadata:
+      labels:
+        app: redcap-nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.27
+        ports:
+        - containerPort: 1080
+        volumeMounts:
+        - mountPath: /var/www/redcap
+          name: redcap-app
+          readOnly: true
+        - mountPath: /etc/nginx/conf.d/redcap.conf
+          name: nginx-conf
+          subPath: redcap.conf
+        - name: nginx-tls
+          mountPath: /etc/nginx/ssl
+          readOnly: true
+
+        readinessProbe:
+          exec:
+            command:
+              - /bin/sh
+              - -c
+              - |
+                curl -sf telnet://redcap-svc:9000 >/dev/null
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          timeoutSeconds: 3
+          successThreshold: 1
+          failureThreshold: 3
+
+      volumes:
+      - name: nginx-tls
+        secret:
+          secretName: redcap-tls
+      - name: redcap-app
+        persistentVolumeClaim:
+          claimName: redcap-app-pvc
+      - name: nginx-conf
+        configMap:
+          name: redcap-nginx
+          items:
+          - key: redcap.conf
+            path: redcap.conf
+
