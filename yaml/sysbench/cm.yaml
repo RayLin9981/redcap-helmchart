@@ -3,6 +3,49 @@ kind: ConfigMap
 metadata:
   name: sysbench-scripts
 data:
+  sysbench-read-write.sh: |
+    #!/bin/bash
+    set -e
+
+    echo "=== 🧩 Sysbench Read-Only Test Start ==="
+    echo "Host: ${MYSQL_HOST}"
+    echo "Tables: ${TABLES}"
+    echo "Table size: ${TABLE_SIZE}"
+
+    sysbench /usr/local/share/sysbench/oltp_read_write.lua \
+      --mysql-host=${MYSQL_HOST} \
+      --mysql-port=3306 \
+      --mysql-user=sbtest \
+      --mysql-password=sbtest \
+      --mysql-db=sbtest \
+      --tables=${TABLES} \
+      --table-size=${TABLE_SIZE} \
+      prepare
+
+    sysbench /usr/local/share/sysbench/oltp_read_write.lua \
+      --mysql-host=${MYSQL_HOST} \
+      --mysql-port=3306 \
+      --mysql-user=sbtest \
+      --mysql-password=sbtest \
+      --mysql-db=sbtest \
+      --tables=${TABLES} \
+      --table-size=${TABLE_SIZE} \
+      --threads=8 \
+      --time=60 \
+      --report-interval=10 \
+      --histogram \
+      run
+
+    sysbench /usr/local/share/sysbench/oltp_read_write.lua \
+      --mysql-host=${MYSQL_HOST} \
+      --mysql-port=3306 \
+      --mysql-user=sbtest \
+      --mysql-password=sbtest \
+      --mysql-db=sbtest \
+      --tables=${TABLES} \
+      --table-size=${TABLE_SIZE} \
+      cleanup
+
   sysbench-readonly.sh: |
     #!/bin/bash
     set -e
