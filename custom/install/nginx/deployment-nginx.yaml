@@ -4,7 +4,6 @@ metadata:
   name: redcap-nginx
   labels:
     app: redcap-nginx
-  namespace: redcap
 spec:
   replicas: 1
   selector:
