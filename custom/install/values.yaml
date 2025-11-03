@@ -1,0 +1,184 @@
+global:
+  security:
+    allowInsecureImages: true
+ingress:
+  enabled: true
+  hosts:
+  - host: "pocredcap.ntuh.gov.tw"
+    paths:
+      - path: /
+        pathType: "ImplementationSpecific"
+
+networkPolicies:
+  #enabled: false
+  enabled: true
+
+
+httpd: 
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "0.25"
+    limits:
+      memory: "1Gi"
+      cpu: "0.5"
+
+redcap:
+  install:
+    enabled: true
+    version: "15.2.27"
+    communityAuth:
+      existingSecret: "redcap-community-credentials"
+  database:
+    auth:
+      # -- The hostname of REDCap's database instance.
+      # @section -- REDCap settings
+      hostname: "redcap-mysql"
+      # -- The name of REDCAP's database.
+      # @section -- REDCap settings
+      databaseName: "redcap"
+      # -- The username used to connect to REDCAP's database.
+      # @section -- REDCap settings
+      username: "redcap"
+        # -- The password used to connect to REDCAP's database. Automatically retrieved from the default mysql secret name if you enbaled
+        #    the MySQL database embedded in this chart. If you specified a reference to an secret for your MySQL database password, you·
+        #    have to set it here also, in the `secretKeyRef` section.
+      password:
+        # -- The password used to connect to REDCAP's database, as a clear string. Don't use the option for a production-grade deployment,·                       #    refer to an external secret instead!                                                                                                                 # @section -- REDCap settings
+        value: ""
+        secretKeyRef:
+          # -- The name of the secret holding the password used to connect to REDCAP database.                                                                      #    If set, the value of that secret will override the `redcap.config.database.auth.password.value` value.                                               # @section -- REDCap settings
+          name: ""
+          # -- The key of the secret holding the password used to connect to REDCAP database.
+          #    If set, the value of that secret will override the `redcap.config.database.auth.password.value` value.
+          # @section -- REDCap settings
+          key: ""
+  config:
+    # -- If set to `true`, will log all the errors on the stdout (NOT RECOMMENDED IN PRODUCTION).
+    # @section -- REDCap settings
+    logAllErrors: "FALSE"
+    # -- The URL on which the application is exposed (useful if the application is behind a reverse-proxy).
+    # @section -- REDCap settings
+    externalURL: "https://pocredcap.ntuh.gov.tw"
+    # -- The name of the institution that is presented to the users.
+    # @section -- REDCap settings
+    institutionName: "REDCap Local Institution"
+    # -- The name of the origanization inside the institution that is presented to the users.
+    # @section -- REDCap settings
+    organizationName: "REDCap Local Organization"
+    # -- The name of the administrator that is presented to the users.
+    # @section -- REDCap settings
+    adminName: "REDCap Local Admin"
+    # -- The email of the administrator that is presented to the users.
+    # @section -- REDCap settings
+    adminMail: "redcap-admin@local.com"
+    # -- Prevents modifications on REDCap application directory for security reasons. Not compatible with the·
+    #    `Easy Upgrade` feature, that should be disabled from the Control Center if this option is enabled.
+    # @section -- REDCap settings
+    readOnlyAppDir: true
+  resources:
+    requests:
+      memory: "2Gi"
+      cpu: "0.5"
+    limits:
+      memory: "4Gi"
+      cpu: "2"
+  image:
+    # -- Image repository for REDCap PHP-FPM Image.
+    # @section -- REDCap settings
+    repository: "docker.io/raylin9981/redcap-php-fpm"
+    # -- PullPolicy for REDCap PHP-FPM Image.
+    # @section -- REDCap settings
+    pullPolicy: "Always"
+    # -- Tag for REDCap PHP-FPM Image.
+    # @section -- REDCap settings
+    tag: "1.2.0-20251003-v2"
+
+mysql:
+  image:
+    repository: bitnamilegacy/mysql
+  primary:
+    resources:
+      requests:
+        memory: "2Gi"
+        cpu: "0.5"
+      limits:
+        memory: "4Gi"
+        cpu: "2"
+    persistence:
+      # -- StorageClass used for database persistence.
+      # @section -- REDCap MySQL Database settings
+      #storageClass: "local-path"
+      storageClass: "standard"
+backupJob:
+  #enabled: false
+  enabled: true
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "0.25"
+    limits:
+      memory: "1Gi"
+      cpu: "0.5"
+
+restoreJob:
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "0.25"
+    limits:
+      memory: "1Gi"
+      cpu: "0.5"
+
+# Autoscaling settings
+autoscaling:
+  # -- If set to `true`, enables autoscaling
+  # @section -- Autoscaling settings
+  #enabled: false
+  enabled: true
+  # -- Minimum replicas instances.
+  # @section -- Autoscaling settings
+  minReplicas: 1
+  # -- Maximum replicas target
+  # @section -- Autoscaling settings
+  maxReplicas: 3
+  # -- CPU usage threshold for autoscaling.
+  # @section -- Autoscaling settings
+  targetCPUUtilizationPercentage: 80
+  # -- Memory usage threshold for autoscaling.
+  # @section -- Autoscaling settings
+  targetMemoryUtilizationPercentage: 80
+
+persistence:
+  app:
+    storageClass: "standard"
+    # -- AccessMode of the volume used to persist REDCap code.
+    # @section -- Persistence settings
+    accessMode: "ReadWriteOnce"
+  edocs:
+    # -- Annotations related to the volume handling the REDCap users edocs.
+    # @section -- Persistence settings
+    # @default -- Keeping the volume after a Helm release deletion.
+    annotations:
+      helm.sh/resource-policy: "keep"
+    # -- Size of the volume used to persist documents uploaded by REDCap users.
+    # @section -- Persistence settings
+    size: "8Gi"
+    # -- StorageClass of the volume used to persist documents uploaded by REDCap users.
+    # @section -- Persistence settings
+    storageClass: "standard"
+    # -- AccessMode of the volume used to persist documents uploaded by REDCap users.
+    # @section -- Persistence settings
+    accessMode: "ReadWriteOnce"
+  modules:
+    annotations:
+      helm.sh/resource-policy: "keep"
+    # -- Size of the volume used to persist REDCap modules.
+    # @section -- Persistence settings
+    size: "1Gi"
+    # -- StorageClass of the volume used to persist REDCap modules.
+    # @section -- Persistence uploaded
+    storageClass: "standard"
+    # -- AccessMode of the volume used to persist REDCap modules.
+    # @section -- Persistence settings
+    accessMode: "ReadWriteOnce"

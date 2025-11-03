@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# === 可自訂參數 ===
+export NAMESPACE="redcap"
+export REDCAP_VERSION="15.0.27"
+
+# #/redcap_upgrade_${REDCAP_VERSION}.zip
+# #/redcap_full_${REDCAP_VERSION}.zip
+
+# 建立 namespace 與社群版登入憑證
+kubectl create namespace "${NAMESPACE}" || true
+kubectl -n "${NAMESPACE}" create secret generic redcap-community-credentials \
+  --from-literal USERNAME='my-username' \
+  --from-literal PASSWORD='my-password' \
+  --dry-run=client -o yaml | kubectl apply -f -
+
+helm upgrade --install -n "${NAMESPACE}" redcap aphp-redcap/redcap \
+  -f ./examples/local/values.yaml \
+  --wait --wait-for-jobs
+
+# 上傳 REDCap ZIP 安裝包
+kubectl cp -n "${NAMESPACE}" ./redcap.zip \
+  "$(kubectl get pods -n "${NAMESPACE}" -l "app.kubernetes.io/name"=redcap -o jsonpath='{.items[0].metadata.name}')":/tmp/redcap/redcap_full_${REDCAP_VERSION}.zip \
+  -c init-download-redcap
+
+# 部署 Nginx
+kubectl -n "${NAMESPACE}" apply -f nginx
+
+# 還原 MySQL 資料
+kubectl -n "${NAMESPACE}" apply -f job-mysql-restore.yaml
+
+# 匯入資料庫憑證
+kubectl -n "${NAMESPACE}" create secret generic redcap-database-credentials \
+  --from-file=credentials.php=./credentials.php \
+  --dry-run=client -o yaml | kubectl apply -f -
+
+# 同步外部檔案（modules / languages / ldap）
+POD_NAME=$(kubectl get pods -n "${NAMESPACE}" -l "app.kubernetes.io/name"=redcap -o jsonpath='{.items[0].metadata.name}')
+
+kubectl cp -n "${NAMESPACE}" ./modules   "${POD_NAME}:/app/redcap/modules"
+kubectl cp -n "${NAMESPACE}" ./languages "${POD_NAME}:/app/redcap/languages"
+kubectl cp -n "${NAMESPACE}" ./ldap_config.php "${POD_NAME}:/app/redcap/webtools2/ldap"
+
+# 重啟 REDCap Deployment
+kubectl -n "${NAMESPACE}" rollout restart deployment redcap
+
