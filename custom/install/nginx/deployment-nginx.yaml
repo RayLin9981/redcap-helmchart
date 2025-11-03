@@ -4,6 +4,7 @@ metadata:
   name: redcap-nginx
   labels:
     app: redcap-nginx
+    app.kubernetes.io/role: redcap-httpd
 spec:
   replicas: 1
   selector:

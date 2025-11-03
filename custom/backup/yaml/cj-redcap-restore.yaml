@@ -5,6 +5,7 @@ metadata:
   labels:
     app.kubernetes.io/name: redcap-restore-job
     app.kubernetes.io/instance: redcap
+    app.kubernetes.io/role: redcap-restore-job
 spec:
   schedule: "0 0 1 1 *"  
   suspend: true          
@@ -25,7 +26,7 @@ spec:
             - sh
             - -c
             - |
-              chmod +x /scripts/restore.sh && /scripts/restore.sh /backup-data/redcap-backup-latest.tar.gz
+              /scripts/restore.sh /backup-data/redcap-backup-latest.tar.gz
             envFrom:
             - configMapRef:
                 name: redcap-db-config
@@ -42,6 +43,8 @@ spec:
               mountPath: /edocs
             - name: backup-pvc
               mountPath: /backup-data
+            - name: restore
+              mountPath: /restore-data
             - name: backup-scripts
               mountPath: /scripts
           volumes:
@@ -58,3 +61,5 @@ spec:
             configMap:
               name: redcap-backup-scripts
               defaultMode: 0755
+          - name: restore
+            emptyDir: {}
