@@ -33,20 +33,16 @@ spec:
         - name: nginx-config-volume
           mountPath: /etc/nginx/nginx.conf
           subPath: nginx.conf
-
+        - name: redcap-healthz
+          mountPath: /var/www/redcap/healthz.php
+          subPath: healthz.php
         readinessProbe:
-          exec:
-            command:
-              - /bin/sh
-              - -c
-              - |
-                curl -sf telnet://redcap-svc:9000 >/dev/null
+          httpGet:
+            path: /healthz
+            port: 1080
           initialDelaySeconds: 5
           periodSeconds: 10
-          timeoutSeconds: 3
-          successThreshold: 1
           failureThreshold: 3
-
       volumes:
       - name: nginx-config-volume
         configMap:
@@ -66,4 +62,9 @@ spec:
           items:
           - key: redcap.conf
             path: redcap.conf
-
+      - name: redcap-healthz
+        configMap:
+          name: redcap-healthz
+          items:
+            - key: healthz.php
+              path: healthz.php

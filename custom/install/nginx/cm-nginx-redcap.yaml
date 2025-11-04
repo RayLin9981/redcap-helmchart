@@ -26,6 +26,12 @@ data:
         location / {
             try_files $uri $uri/ /index.php?$args;
         }
+        location = /healthz {
+            fastcgi_pass redcap-svc:9000;
+            include fastcgi_params;
+            fastcgi_param SCRIPT_FILENAME $document_root/healthz.php;
+            fastcgi_param SCRIPT_NAME /healthz.php;
+        }
 
         location ~ \.php$ {
             include fastcgi_params;
