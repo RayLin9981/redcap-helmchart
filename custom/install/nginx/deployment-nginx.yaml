@@ -30,6 +30,9 @@ spec:
         - name: nginx-tls
           mountPath: /etc/nginx/ssl
           readOnly: true
+        - name: nginx-config-volume
+          mountPath: /etc/nginx/nginx.conf
+          subPath: nginx.conf
 
         readinessProbe:
           exec:
@@ -45,6 +48,12 @@ spec:
           failureThreshold: 3
 
       volumes:
+      - name: nginx-config-volume
+        configMap:
+          name: nginx-config
+          items:
+          - key: nginx.conf
+            path: nginx.conf
       - name: nginx-tls
         secret:
           secretName: redcap-tls
