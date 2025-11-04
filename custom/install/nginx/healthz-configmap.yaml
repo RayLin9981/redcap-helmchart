@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: redcap-healthz
+data:
+  healthz.php: |
+    <?php
+    // 檢查 PHP 是否能正常執行
+    http_response_code(200);
+    echo "OK";
+
